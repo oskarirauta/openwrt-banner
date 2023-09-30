@@ -1,0 +1,3 @@
+[submodule "cmdparser"]
+	path = cmdparser
+	url = https://github.com/oskarirauta/cmdparser.git
