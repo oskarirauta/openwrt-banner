@@ -1,0 +1,40 @@
+name: Create Release
+run-name: ${{ github.actor }} is creating new release ${{ github.event.inputs.tagname }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      tagname:
+        description: "tag name"
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.tagname }}
+          release_name: ${{ github.event.inputs.tagname }}
+          draft: false
+          prerelease: false
+      - name: Create source distribution
+        run: |
+            set -x
+            git clone --recursive https://github.com/${{github.repository}} ${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}
+            # Cleanup
+            find ${{ github.event.repository.name }}-${{ github.event.inputs.tagname }} -name '.git*' -exec rm -rv {} \; || true
+            tar -czf "${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}.tar.gz" "${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}"
+      - name: Upload source distribution
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{steps.create_release.outputs.upload_url}}
+          asset_path: ./${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}.tar.gz
+          asset_name: ${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}.tar.gz
+          asset_content_type: application/tar.gz
