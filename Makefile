@@ -7,6 +7,7 @@ OBJS:= \
 	objs/logo.o \
 	objs/env.o \
 	objs/release.o \
+	objs/failsafe.o \
 	objs/main.o
 
 LIBS:=
@@ -27,6 +28,9 @@ objs/env.o: src/env.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(EXTRA_CXXFLAGS) -c -o $@ $<;
 
 objs/release.o: src/release.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(EXTRA_CXXFLAGS) -c -o $@ $<;
+
+objs/failsafe.o: src/failsafe.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(EXTRA_CXXFLAGS) -c -o $@ $<;
 
 objs/main.o: main.cpp

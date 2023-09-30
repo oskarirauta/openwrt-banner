@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 	if ( failsafe_mode ) {
 
 		std::cout <<
-			banner.failsafe_msg() <<
+			banner::failsafe_msg() <<
 			std::endl;
 
 		return 0;
