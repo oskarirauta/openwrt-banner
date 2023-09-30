@@ -43,8 +43,6 @@ void banner::release_info(std::string& os_release, std::string& os_commit) {
 	if ( std::filesystem::exists("/etc/openwrt_release"))
 		if ( std::ifstream ifs("/etc/openwrt_release"); ifs && ifs.is_open() && !ifs.fail() && ifs.good() && !ifs.eof()) {
 
-			os_commit = "hello";
-
 			std::string s;
 			while ( std::getline(ifs, s)) {
 

@@ -8,6 +8,7 @@
 #include "logo.hpp"
 #include "env.hpp"
 #include "release.hpp"
+#include "failsafe.hpp"
 #include "constants.hpp"
 
 #include "cmdparser.hpp"
@@ -29,6 +30,7 @@ static void usage(const std::string &cmd) {
 			"  options:\n" <<
 			"    --help, --h                usage\n" <<
 			"    --classic, --c             use classic logo\n" <<
+			"    --failsafe, --f            use failsafe banner\n" <<
 			"    --version, --v		show version\n" <<
 			std::endl;
 }
@@ -36,6 +38,7 @@ static void usage(const std::string &cmd) {
 int main(int argc, char *argv[]) {
 
 	bool use_classic_logo = false;
+	bool failsafe_mode = false;
 
 	if ( argc > 1 ) {
 
@@ -54,10 +57,20 @@ int main(int argc, char *argv[]) {
 
 			}, false },
 			{{ "-c", "--c", "-classic", "--classic" }, [&use_classic_logo](const CmdParser::Arg &arg) { use_classic_logo = true; }, false },
+			{{ "-f", "--f", "-failsafe", "--failsafe" }, [&failsafe_mode](const CmdParser::Arg &arg) { failsafe_mode = true; }, false },
 			{{ "" }, [](const CmdParser::Arg &arg) { logo_file = arg.arg; }, false }
 		});
 
 		cmdparser.parse();
+	}
+
+	if ( failsafe_mode ) {
+
+		std::cout <<
+			banner.failsafe_msg() <<
+			std::endl;
+
+		return 0;
 	}
 
 	std::string logo(banner::logo(logo_file, use_classic_logo));
