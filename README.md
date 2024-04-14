@@ -1,4 +1,6 @@
-# openwrt-banner
+[![License:MIT](https://img.shields.io/badge/License-MIT-blue?style=plastic)](LICENSE)
+[![C++ CI build](../../actions/workflows/build.yml/badge.svg)](../../actions/workflows/build.yml)
+### openwrt-banner
 
 simple login banner/motd written in c++
 
@@ -13,7 +15,7 @@ needed. And allows also to use logo from file (not in initial version).
 
 utf-8 logo files are supported.
 
-### Usage
+## <sub>Usage</sub>
 
 ```
 ./banner [options] [alternative logo text file]
@@ -24,7 +26,3 @@ Command-line options:
  --classic  use classic logo
  --version  version information
 ```
-
-### License
-
-MIT

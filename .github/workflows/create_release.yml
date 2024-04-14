@@ -1,40 +1,50 @@
-name: Create Release
-run-name: ${{ github.actor }} is creating new release ${{ github.event.inputs.tagname }}
+name: New release
+run-name: ${{ github.actor }} is creating a new release ${{ inputs.tagname }}
 
 on:
   workflow_dispatch:
     inputs:
       tagname:
         description: "tag name"
+        required: true
+      releasename:
+        description: "release name"
+        required: false
+      latest:
+        description: "mark as latest release"
+        type: boolean
+        default: true
+      deep:
+        description: 'create archive recursively on all levels'
+        type: boolean
+        default: false
 
 jobs:
-  release:
-    name: Create Release
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: create release
+        uses: oskarirauta/create-release-action@v1
         with:
-          tag_name: ${{ github.event.inputs.tagname }}
-          release_name: ${{ github.event.inputs.tagname }}
-          draft: false
-          prerelease: false
-      - name: Create source distribution
+          token: ${{ github.token }}
+          tag: ${{ inputs.tagname }}
+          release: ${{ inputs.releasename }}
+          latest: ${{ inputs.latest }}
+      - name: report
+        shell: bash
         run: |
-            set -x
-            git clone --recursive https://github.com/${{github.repository}} ${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}
-            # Cleanup
-            find ${{ github.event.repository.name }}-${{ github.event.inputs.tagname }} -name '.git*' -exec rm -rv {} \; || true
-            tar -czf "${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}.tar.gz" "${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}"
-      - name: Upload source distribution
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "created release ${{ inputs.releasename }} with tag ${{ inputs.tagname }}" >> $GITHUB_STEP_SUMMARY
+      - name: create asset
+        uses: oskarirauta/upload-recursive-asset-action@v1
         with:
-          upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: ./${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}.tar.gz
-          asset_name: ${{ github.event.repository.name }}-${{ github.event.inputs.tagname }}.tar.gz
-          asset_content_type: application/tar.gz
+          token: ${{ github.token }}
+          tag: ${{ inputs.tagname }}
+          id: ${{ env.release_id }}
+          deep: ${{ inputs.deep }}
+      - name: finish
+        shell: bash
+        run: |
+          echo "release ${{ env.release_name }} created succesfully" >> $GITHUB_STEP_SUMMARY
+          echo "recursive asset ${{ env.asset_file }} uploaded with size of ${{ env.bytes_uploaded }} bytes" >> $GITHUB_STEP_SUMMARY

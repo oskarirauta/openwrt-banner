@@ -1,7 +1,8 @@
 all: world
+
 CXX?=g++
-CXXFLAGS?=--std=c++17 -Wall
-INCLUDES:=-I./include -I.
+CXXFLAGS?=--std=c++17 -Wall -g
+INCLUDES+= -I./include
 
 OBJS:= \
 	objs/logo.o \
@@ -10,13 +11,11 @@ OBJS:= \
 	objs/failsafe.o \
 	objs/main.o
 
-LIBS:=
-
 include cmdparser/Makefile.inc
 
 HARDCODED_RELEASE?=""
 
-EXTRA_CXXFLAGS:= \
+EXTRA_CXXFLAGS+= \
 	-DRELEASE_NAME=\"$(HARDCODED_RELEASE)\"
 
 world: banner
@@ -37,7 +36,8 @@ objs/main.o: main.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(EXTRA_CXXFLAGS) -c -o $@ $<;
 
 banner: $(CMDPARSER_OBJS) $(OBJS)
-	$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(LDFLAGS) $(LIBS) $^ -o $@;
+	$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(LDFLAGS) $^ -o $@;
 
+.PHONY: clean
 clean:
-	rm -f objs/*.o banner
+	@rm -f objs/*.o banner

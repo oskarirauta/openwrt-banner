@@ -1,3 +1,9 @@
 
 0.89.2
  - failsafe mode
+
+0.90.0
+ - update build scripts(Makefiles)
+ - update cmdparser submodule
+ - update workflows
+ - update README.md
