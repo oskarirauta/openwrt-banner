@@ -9,62 +9,50 @@
 #include "env.hpp"
 #include "release.hpp"
 #include "failsafe.hpp"
-#include "constants.hpp"
 
-#include "cmdparser.hpp"
+#include "usage.hpp"
 
 static const std::string root_pw_warning = " warning, root password is not set";
 static const std::string banner_file_missing = " access error, banner file: ";
 
 static std::string logo_file;
 
-static void version_header(void) {
-
-	std::cout << APP_NAME << " v" << APP_VERSION << "\n"
-		"author: Oskari Rauta" << std::endl;
-}
-
-static void usage(const std::string &cmd) {
-	std::cout << "\nusage: " << cmd << " [options] [banner/motd file]" << "\n" << std::endl;
-	std::cout <<
-			"  options:\n" <<
-			"    --help, --h                usage\n" <<
-			"    --classic, --c             use classic logo\n" <<
-			"    --failsafe, --f            use failsafe banner\n" <<
-			"    --version, --v		show version\n" <<
-			std::endl;
-}
-
 int main(int argc, char *argv[]) {
 
-	bool use_classic_logo = false;
-	bool failsafe_mode = false;
+	usage_t usage = {
+		.args = { argc, argv },
+		.name = "banner",
+		.version_title = "v",
+		.version = "1.0.0",
+		.author = "Oskari Rauta",
+		.options = {
+			{ "classic", { .key = "c", .word = "classic", .desc = "use classic logo" }},
+			{ "failsafe", { .key = "f", .word = "failsafe", .desc = "use failsafe banner" }},
+			{ "version", { .key = "v", .word = "version", .desc = "show version" }},
+			{ "help", { .key = "h", .word = "help", .desc = "this usage message" }}
+		}
+	};
 
-	if ( argc > 1 ) {
+	if ( usage["help"] ) {
 
-		CmdParser cmdparser(std::vector<std::string>(argv, argv + argc), {
-			{{ "-h", "--h", "-help", "--help", "-usage", "--usage" }, [](const CmdParser::Arg &arg) {
+		std::cout << usage << "\n\nusage:\n" << usage.help() << "\n" << std::endl;
+		return 0;
+	} else if ( usage["version"] ) {
 
-				version_header();
-				usage(arg.cmd);
-				exit(0);
+		std::cout << usage.version_info() << std::endl;
+		return 0;
+	} else if ( !usage.args.empty()) {
 
-			}, false },
-			{{ "-v", "--v", "-version", "--version" }, [](const CmdParser::Arg &arg) {
-
-				version_header();
-				exit(0);
-
-			}, false },
-			{{ "-c", "--c", "-classic", "--classic" }, [&use_classic_logo](const CmdParser::Arg &arg) { use_classic_logo = true; }, false },
-			{{ "-f", "--f", "-failsafe", "--failsafe" }, [&failsafe_mode](const CmdParser::Arg &arg) { failsafe_mode = true; }, false },
-			{{ "" }, [](const CmdParser::Arg &arg) { logo_file = arg.arg; }, false }
-		});
-
-		cmdparser.parse();
+		try {
+			usage.validate();
+		} catch ( const std::runtime_error& e ) {
+			std::cout << usage << "\n\nusage:\n" << usage.help() << "\n\n" <<
+					"error: " << e.what() << std::endl;
+			return 1;
+		}
 	}
 
-	if ( failsafe_mode ) {
+	if ( usage["failsafe"] ) {
 
 		std::cout <<
 			banner::failsafe_msg() <<
@@ -73,7 +61,7 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	std::string logo(banner::logo(logo_file, use_classic_logo));
+	std::string logo(banner::logo(logo_file, usage["classic"]));
 	int logo_width = banner::logo_width(logo);
 	std::string os_release, os_commit;
 

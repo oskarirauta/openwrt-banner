@@ -11,7 +11,8 @@ OBJS:= \
 	objs/failsafe.o \
 	objs/main.o
 
-include cmdparser/Makefile.inc
+include common/Makefile.inc
+include usage/Makefile.inc
 
 HARDCODED_RELEASE?=""
 
@@ -35,7 +36,7 @@ objs/failsafe.o: src/failsafe.cpp
 objs/main.o: main.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(EXTRA_CXXFLAGS) -c -o $@ $<;
 
-banner: $(CMDPARSER_OBJS) $(OBJS)
+banner: $(COMMON_OBJS) $(USAGE_OBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(LDFLAGS) $^ -o $@;
 
 .PHONY: clean
