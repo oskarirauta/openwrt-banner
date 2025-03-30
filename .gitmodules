@@ -1,6 +1,3 @@
-[submodule "usage"]
-	path = usage
-	url = https://github.com/oskarirauta/usage_cpp.git
 [submodule "common"]
 	path = common
 	url = https://github.com/oskarirauta/common_cpp.git
