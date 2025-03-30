@@ -3,26 +3,56 @@
 #include <streambuf>
 #include <filesystem>
 #include <algorithm>
+#include <exception>
 #include <vector>
+#include <map>
 
+#include "common.hpp"
 #include "logo.hpp"
+
+#include <iostream>
 
 bool banner::logo_error = false;
 
-static std::string classic_logo(void) {
+static std::map<std::string, LOGO> logo_names = {
+	{ "NONE", LOGO::NO_LOGO }, { "NO_LOGO", LOGO::NO_LOGO },
+	{ "CLASSIC", LOGO::CLASSIC },
+	{ "CLASSIC2", LOGO::CLASSIC2 },
+	{ "TINY", LOGO::TINY },
+	{ "SMALL", LOGO::SMALL },
+	{ "THIN", LOGO::THIN },
+	{ "SIMPLE", LOGO::SIMPLE },
+	{ "ROUND", LOGO::ROUND },
+	{ "GRAFFITI", LOGO::GRAFFITI },
+	{ "SPORT", LOGO::SPORT },
+	{ "PAINT", LOGO::PAINT },
+	{ "BLOCKY", LOGO::BLOCKY }, { "DEFAULT", LOGO::BLOCKY }
+};
 
-	return
+static std::map<std::string, SUBTITLE> subtitle_names = {
+	{ "NONE", SUBTITLE::NO_SUBTITLE }, { "NO_SUBTEXT", SUBTITLE::NO_SUBTITLE }, { "NO_SUBTITLE", SUBTITLE::NO_SUBTITLE },
+	{ "DEFAULT", SUBTITLE::NO_SUBTITLE },
+	{ "PLAIN", SUBTITLE::PLAIN },
+	{ "EXTENDED", SUBTITLE::EXTENDED },
+	{ "THINTEXT", SUBTITLE::THINTEXT },
+	{ "ITALY", SUBTITLE::ITALY },
+	{ "BOLD", SUBTITLE::BOLD },
+	{ "LARGE", SUBTITLE::LARGE }
+};
+
+static std::map<LOGO, std::string> logos = {
+
+	{ LOGO::NO_LOGO, "" },
+
+	{ LOGO::CLASSIC,
 		" _______                     ________        __   \n"
 		"|       |.-----.-----.-----.|  |  |  |.----.|  |_ \n"
 		"|   -   ||  _  |  -__|     ||  |  |  ||   _||   _|\n"
 		"|_______||   __|_____|__|__||________||__|  |____|\n"
-		"         |__| W I R E L E S S   F R E E D O M     \n";
-}
+		"         |__| W I R E L E S S   F R E E D O M     \n"
+	},
 
-static std::string default_logo(void) {
-
-	return
-		"\n"
+	{ LOGO::CLASSIC2,
 		"  ░░░░░░  ░░░░░░░ ░░░░░░░ ░░░   ░░ ░░░  ░░░░░░░░░░  ░░░░░░░░░\n"
 		" ░▒█████░ ░██▓███░░▓█████░███▄  ██░██░ ░░░█▓▒█████▄░▒█████▓▒░\n"
 		"░▒██▒  ██▒▒██▒ ▀██▒▓█▒░░▀ ██▀█░ ██▒▓█░░█▒░█▓▒▓█▒ ▀██░ ▒██▒░░░\n"
@@ -30,13 +60,173 @@ static std::string default_logo(void) {
 		"░░██░ ░██░▒██▄▄█▓░▒▓█▒░░▄ ██▒ █▌██▒░█▒▒██░█▒▒██▀██▄   ░█▓▒░  \n"
 		" ░▒████▓▒░▒██▒░░░░▒██████▒██░ ▀███░ ░██▒██░░░██ ░▒██░ ░██▒░  \n"
 		"  ░░░▒▒░░ ░▓█▒░   ░░░░░▒░░▒░░  ░░▒░ ░░░░▒░  ░░▒  ░▒░░ ░░▒░░  \n"
-		"                           W I R E L E S S    F R E E D O M  \n";
+		"                           W I R E L E S S    F R E E D O M  \n"
+	},
+
+	{ LOGO::TINY,
+		"╔═╗──────╔╦═╦╗─╔╗ \n"
+		"║║╠═╦═╦═╦╣║║║╠╦╣╚╗\n"
+		"║║║╬║╩╣║║║║║║║╔╣╔╣\n"
+		"╚═╣╔╩═╩╩═╩═╩═╩╝╚═╝\n"
+		"──╚╝              \n"
+	},
+
+	{ LOGO::SMALL,
+		"▒█▀▀▀█ █▀▀█ █▀▀ █▀▀▄ ▒█░░▒█ █▀▀█ ▀▀█▀▀\n"
+		"▒█░░▒█ █░░█ █▀▀ █░░█ ▒█▒█▒█ █▄▄▀ ░░█░░\n"
+		"▒█▄▄▄█ █▀▀▀ ▀▀▀ ▀░░▀ ▒█▄▀▄█ ▀░▀▀ ░░▀░░\n"
+	},
+
+	{ LOGO::THIN,
+		"░▒█▀▀▀█░▄▀▀▄░█▀▀░█▀▀▄░▒█░░▒█░█▀▀▄░▀█▀\n"
+		"░▒█░░▒█░█▄▄█░█▀▀░█░▒█░▒█▒█▒█░█▄▄▀░░█░\n"
+		"░▒█▄▄▄█░█░░░░▀▀▀░▀░░▀░▒▀▄▀▄▀░▀░▀▀░░▀░\n"
+	},
+
+	{ LOGO::SIMPLE,
+		" _______                       ________        __   \n"
+		"|       |.-----..-----..-----.|  |  |  |.----.|  |_ \n"
+		"|   -   ||  _  ||  -__||     ||  |  |  ||   _||   _|\n"
+		"|_______||   __||_____||__|__||________||__|  |____|\n"
+		"         |__|                                       \n"
+	},
+
+	{ LOGO::ROUND,
+		" .--.                   .-.   .-.      .-. \n"
+		": ,. :                  : :.-.: :     .' `.\n"
+		": :: :.---.  .--. ,-.,-.: :: :: :.--. `. .'\n"
+		": :; :: .; `' '_.': ,. :: `' `' ;: ..' : : \n"
+		"`.__.': ._.'`.__.':_;:_; `.,`.,' :_;   :_; \n"
+		"      : :                                  \n"
+		"      :_;                                  \n"
+	},
+
+	{ LOGO::GRAFFITI,
+		"       ▄▄▄·▄▄▄ . ▐ ▄ ▄▄▌ ▐ ▄▌▄▄▄  ▄▄▄▄▄\n"
+		" ▄█▀▄ ▐█ ▄█▀▄.▀·•█▌▐███· █▌▐█▀▄ █·•██  \n"
+		"▐█▌.▐▌ ██▀·▐▀▀▪▄▐█▐▐▌██▪▐█▐▐▌▐▀▀▄  ▐█.▪\n"
+		"▐█▌.▐▌▐█▪·•▐█▄▄▌██▐█▌▐█▌██▐█▌▐█•█▌ ▐█▌·\n"
+		" ▀█▄▀▪.▀    ▀▀▀ ▀▀ █▪ ▀▀▀▀ ▀▪.▀  ▀ ▀▀▀ \n"
+	},
+
+	{ LOGO::SPORT,
+		"░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░\n"
+		"░░░░░     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ░░░░░░░░   ░░░░░░░░░░░   ░░░░\n"
+		"▒▒▒   ▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒\n"
+		"▒   ▒▒▒▒▒▒▒▒   ▒  ▒   ▒▒▒▒▒▒   ▒▒▒▒▒   ▒   ▒▒▒   ▒▒▒  ▒▒▒   ▒  ▒    ▒       ▒▒\n"
+		"▓   ▓▓▓▓▓▓▓▓   ▓  ▓▓   ▓▓▓  ▓▓▓   ▓▓▓   ▓▓   ▓   ▓▓   ▓▓▓   ▓▓   ▓▓▓▓▓▓   ▓▓██\n"
+		"▓   ▓▓▓▓▓▓▓▓   ▓  ▓▓▓   ▓         ▓▓▓   ▓▓   ▓   ▓  ▓   ▓   ▓▓   ▓▓▓▓▓▓   ▓▓██\n"
+		"▓▓▓   ▓▓▓▓▓   ▓▓   ▓   ▓▓  ▓▓▓▓▓▓▓▓▓▓   ▓▓   ▓  ▓  ▓▓▓▓     ▓▓   ▓▓▓▓▓▓   ▓███\n"
+		"█████     ██████   ████████     ████    ██   █   ████████   █    ███████   ███\n"
+		"████████████████   ███████████████████████████████████████████████████████████\n"
+		"▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀\n"
+	},
+
+	{ LOGO::PAINT,
+		" ▄█████▄ ██████▄ ██████ ██    ██ ██     ██ ██████▄ █████████\n"
+		" ██  ▀██ ██  ▀██ ██     ██▄   ██ ██     ██ ██  ▀██ ▀▀▀███▀▀▀\n"
+		" ██   ██ ██   ██ ██     ████  ██ ██▄   ▄██ ██   ██    ███   \n"
+		" ██   ██ ██  ▄██ █████  ███   ██ ███ ▄ ███ ██  ▄█▀    ███   \n"
+		" ▒▒   ▒▒ ▒▒▒▒▒▒░ ▒▒▒▒▒  ▒▒ ▒▒ ▒▒ ▒▒▒ ▒ ▒▒▒ ▒▒▒▒▒▒     ▒▒▒   \n"
+		" ▒▒   ▒▒ ▒▒      ▒▒     ▒▒ ▒▒ ▒▒ ░▒▒░▒░▒▒░ ▒▒  ▒▒░    ▒▒▒   \n"
+		" ▒▒░  ▒▒ ▒▒      ▒▒     ▒▒  ▒▒▒▒  ▒▒▒▒▒▒▒  ▒▒   ▒▒    ▒▒▒   \n"
+		"  ░░░░░  ░░      ░░░░░░ ░░   ░░░   ░ ░ ░   ░░   ░░    ░░░   \n"
+	},
+
+	{ LOGO::BLOCKY,
+		"  ░░░░░░░░  ░░░░░░░░░  ░░░░░░░░░ ░░░░   ░░░░░ ░░░░░░   ░░░░░░ ░░░░░░░░░░  ░░░░░░░░░░\n"
+		" ░░▒████▒░░ ░▒█████▒░░ ░▒█████▒░ ░▒██   ▒██▒░ ░▒██▒░   ░▒██▒░ ░▒██████▒░░ ░▒██████▒░\n"
+		" ░▒█░  ░█▒░ ░▒█▒░ ▒█▒░ ░▒██▒░    ░▒██▄  ▒██▒░ ░▒██▒░   ░▒██▒░ ░▒█▒░  ▒█▒░ ░░░▒██▒░░░\n"
+		" ░▒█░  ░█▒░ ░▒█▒░ ▒█▒░ ░▒█████▒░ ░▒████▄▒██▒░ ░▒██▒░▒█▒░▒██▒░ ░▒█▒░  ▒█▒░   ░▒██▒░  \n"
+		" ░▒█░  ░█▒░ ░▒█████▒░░ ░▒██▒░    ░▒██▒▀████▒░ ░▒███▒███▒███▒░ ░▒██████▒░    ░▒██▒░  \n"
+		" ░░▒████▒░░ ░▒██▒░░░░  ░▒█████▒░ ░▒██▒  ███▒░ ░░▒████▒████▒░░ ░▒██▒░▒██▒░   ░▒██▒░  \n"
+		"  ░░░░░░░░  ░░░░░░░    ░░░░░░░░░ ░░░░░  ░░░░░  ░░░░░░ ░░░░░░  ░░░░░░░░░░░   ░░░░░░  \n"
+	}
+};
+
+static std::map<SUBTITLE, std::string> subtitles = {
+
+	{ SUBTITLE::NO_SUBTITLE, "" },
+	{ SUBTITLE::PLAIN, "Wireless freedom" },
+	{ SUBTITLE::EXTENDED, "W I R E L E S S   F R E E D O M " },
+	{ SUBTITLE::THINTEXT, "𝖶 𝗂𝗋𝖾𝗅𝖾𝗌𝗌 𝖿𝗋𝖾𝖾𝖽𝗈𝗆" },
+	{ SUBTITLE::ITALY, "𝙒 𝙞𝙧𝙚𝙡𝙚𝙨𝙨 𝙛𝙧𝙚𝙚𝙙𝙤𝙢" },
+	{ SUBTITLE::BOLD, "𝗪 𝗶𝗿𝗲𝗹𝗲𝘀𝘀 𝗳𝗿𝗲𝗲𝗱𝗼𝗺" },
+	{ SUBTITLE::LARGE,
+		"▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄\n"
+		"██░███░██▄██░▄▄▀█░▄▄█░██░▄▄█░▄▄█░▄▄████░▄▄▄█░▄▄▀█░▄▄█░▄▄█░▄▀█▀▄▄▀█░▄▀▄░█\n"
+		"██░█░█░██░▄█░▀▀▄█░▄▄█░██░▄▄█▄▄▀█▄▄▀████░▄▄██░▀▀▄█░▄▄█░▄▄█░█░█░██░█░█▄█░█\n"
+		"██▄▀▄▀▄█▄▄▄█▄█▄▄█▄▄▄█▄▄█▄▄▄█▄▄▄█▄▄▄████░████▄█▄▄█▄▄▄█▄▄▄█▄▄███▄▄██▄███▄█\n"
+		"▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀\n"
+	}
+};
+
+size_t utf8len(std::string s);
+
+static size_t longest_line(const std::string& s) {
+
+	size_t w = 0;
+
+	if ( !s.empty()) {
+
+		std::stringstream ss(s);
+		std::string line;
+
+		while ( std::getline(ss, line, '\n')) {
+			size_t l = utf8len(line);
+			if ( w < l )
+				w = l;
+		}
+	}
+
+	return w;
 }
 
-const std::string banner::logo(const std::string& filename, const bool& use_classic_logo) {
+LOGO parse_logo(const std::string& name) {
+
+	std::string _name = common::to_upper(name);
+
+	if ( auto it = std::find_if(logo_names.begin(), logo_names.end(), [_name](const std::pair<std::string, LOGO>& p) { return p.first == _name; });
+		it != logo_names.end())
+		return it -> second;
+
+	throw std::runtime_error("invalid logo name " + name + ", try using argument -list to see available logo names");
+}
+
+SUBTITLE parse_subtitle(const std::string& name) {
+
+	std::string _name = common::to_upper(name);
+
+	if ( auto it = std::find_if(subtitle_names.begin(), subtitle_names.end(), [_name](const std::pair<std::string, SUBTITLE>& p) { return p.first == _name; });
+		it != subtitle_names.end())
+		return it -> second;
+
+	throw std::runtime_error("invalid subtitle name " + name + ", try using argument -list to see available subtitle names");
+}
+
+const std::string banner::logo(const std::string& filename, const BANNER& props) {
+
+	if ( props.logo == LOGO::NO_LOGO && props.subtitle == SUBTITLE::NO_SUBTITLE )
+		return "";
 
 	banner::logo_error = false;
-	std::string s(use_classic_logo ? classic_logo() : default_logo());
+	std::string s(logos[props.logo]);
+	if ( props.subtitle != SUBTITLE::NO_SUBTITLE ) {
+
+		std::string _s = subtitles[props.subtitle];
+		size_t w = longest_line(s);
+		size_t _w = utf8len(_s);
+
+		if ( w > 0 && _w > 0 && _w < w && props.subtitle != SUBTITLE::LARGE ) {
+
+			while ( _w < w ) {
+				_s = " " + _s;
+				_w++;
+			}
+		}
+
+		s += _s;
+	}
 
 	if ( !filename.empty() && std::filesystem::exists(filename)) {
 
@@ -49,6 +239,7 @@ const std::string banner::logo(const std::string& filename, const bool& use_clas
 				s.erase(std::prev(s.end()));
 
 			ifs.close();
+
 		} else banner::logo_error = true;
 
 	} else if ( !filename.empty()) banner::logo_error = true;
@@ -72,7 +263,7 @@ const std::string banner::logo(const std::string& filename, const bool& use_clas
 		s.pop_back();
 	}
 
-	return s;
+	return "\n" + s;
 }
 
 size_t utf8len(std::string s) {
