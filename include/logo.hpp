@@ -2,7 +2,7 @@
 #include <string>
 
 enum LOGO {
-	NO_LOGO, CLASSIC, CLASSIC2, TINY, SMALL, THIN, SIMPLE, ROUND, GRAFFITI, SPORT, PAINT, BLOCKY
+	NO_LOGO, CLASSIC, CLASSIC2, MODERN, TINY, SMALL, THIN, SIMPLE, ROUND, GRAFFITI, SPORT, PAINT, BLOCKY
 };
 
 enum SUBTITLE {
@@ -10,7 +10,7 @@ enum SUBTITLE {
 };
 
 static const LOGO classic_logo = LOGO::CLASSIC;
-static const LOGO default_logo = LOGO::BLOCKY;
+static const LOGO default_logo = LOGO::MODERN;
 static const SUBTITLE default_subtitle = SUBTITLE::NO_SUBTITLE;
 
 struct BANNER {

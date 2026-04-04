@@ -23,9 +23,9 @@ int main(int argc, char *argv[]) {
 		.args = { argc, argv },
 		.info = {
 			.name = "banner",
-			.version = "1.1.0",
+			.version = "1.2.0",
 			.author = "Oskari Rauta",
-			.copyright = "2025, Oskari Rauta",
+			.copyright = "2026, Oskari Rauta",
 			.description = "\nbanner is program used to display a logo of Openwrt system after user logs in\n"
 		},
 		.options = {
@@ -55,11 +55,11 @@ int main(int argc, char *argv[]) {
 		std::cout << usage.version() << "\n" << std::endl;
 
 		std::cout << "list of logos:\n"
-			<< "none, classic, classic2, tiny, small, thin, simple, round, graffiti, sport, paint, blocky\n"
+			<< "none, classic, classic2, modern, tiny, small, thin, simple, round, graffiti, sport, paint, blocky\n"
 			<< "\nlist of subtitles:\n"
 			<< "none, plain, extended, thintext, italy, bold, large\n"
-			<< "\ndefault logo: blocky"
-			<< "\ndefault subtitle: none (unless no logo, subtitle or file defined, when default is italy)" << std::endl;
+			<< "\ndefault logo: modern"
+			<< "\ndefault subtitle: none (unless no logo, subtitle or file defined, when default is extended)" << std::endl;
 
 		return 0;
 	}
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 	if ( !usage["logo"] && !usage["subtitle"] && !usage["file"] ) {
 
 		props.logo = default_logo;
-		props.subtitle = SUBTITLE::ITALY;
+		props.subtitle = SUBTITLE::EXTENDED;
 	}
 
 	if ( usage["logo"] ) {

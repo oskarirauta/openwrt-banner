@@ -18,6 +18,7 @@ static std::map<std::string, LOGO> logo_names = {
 	{ "NONE", LOGO::NO_LOGO }, { "NO_LOGO", LOGO::NO_LOGO },
 	{ "CLASSIC", LOGO::CLASSIC },
 	{ "CLASSIC2", LOGO::CLASSIC2 },
+	{ "MODERN", LOGO::MODERN },
 	{ "TINY", LOGO::TINY },
 	{ "SMALL", LOGO::SMALL },
 	{ "THIN", LOGO::THIN },
@@ -26,7 +27,7 @@ static std::map<std::string, LOGO> logo_names = {
 	{ "GRAFFITI", LOGO::GRAFFITI },
 	{ "SPORT", LOGO::SPORT },
 	{ "PAINT", LOGO::PAINT },
-	{ "BLOCKY", LOGO::BLOCKY }, { "DEFAULT", LOGO::BLOCKY }
+	{ "BLOCKY", LOGO::BLOCKY }, { "DEFAULT", LOGO::MODERN }
 };
 
 static std::map<std::string, SUBTITLE> subtitle_names = {
@@ -61,6 +62,16 @@ static std::map<LOGO, std::string> logos = {
 		" ░▒████▓▒░▒██▒░░░░▒██████▒██░ ▀███░ ░██▒██░░░██ ░▒██░ ░██▒░  \n"
 		"  ░░░▒▒░░ ░▓█▒░   ░░░░░▒░░▒░░  ░░▒░ ░░░░▒░  ░░▒  ░▒░░ ░░▒░░  \n"
 		"                           W I R E L E S S    F R E E D O M  \n"
+	},
+
+	{ LOGO::MODERN,
+		" ░░░░░░ ░░░░ ░░░░░░ ░░░ ░░ ░░░░ ░░░ ░░░░ ░░░░░░░░\n"
+		"░░▒▓█▒░░▓███▄░█████░██░░██░██░░ ░██░▓███▄▓████▓▒░\n"
+		"░█▓░░▓█░▓█░██░██▒░░ ██▓░██░██░░ ░██░▓█░██░░██▒░░░\n"
+		"░█▓░░▓█░▓█▄█▀░████░ ██▒▓██░██░▓▒░██░▓█▄█▀ ░██▒░\n"
+		"░█▓░░▓█░▓█▒░ ░██▒░░ ██░▒██░██░▓▓░██░▓█▀█▓ ░██▒░\n"
+		"░░▒▓█▒░░▓█▒░ ░█████░██░ ██░░██▓▒▓█░░▓█░█▓ ░██▒░\n"
+		" ░░░░░░ ░░░░ ░░░░░░ ░░░ ░░ ░░ ░░░░ ░░░ ░░ ░░░░░\n"
 	},
 
 	{ LOGO::TINY,
@@ -161,6 +172,22 @@ static std::map<SUBTITLE, std::string> subtitles = {
 	}
 };
 
+static std::map<LOGO, size_t> subtitle_offsets = {
+        { LOGO::NO_LOGO, 0 },
+        { LOGO::CLASSIC, 0 },
+        { LOGO::CLASSIC2, 0 },
+        { LOGO::MODERN, -1 },
+        { LOGO::TINY, 0 },
+        { LOGO::SMALL, 0 },
+        { LOGO::THIN, 0 },
+        { LOGO::SIMPLE, 0 },
+        { LOGO::ROUND, 0 },
+        { LOGO::GRAFFITI, 0 },
+        { LOGO::SPORT, 0 },
+        { LOGO::PAINT, 0 },
+        { LOGO::BLOCKY, 0 }
+};
+
 size_t utf8len(std::string s);
 
 static size_t longest_line(const std::string& s) {
@@ -215,7 +242,7 @@ const std::string banner::logo(const std::string& filename, const BANNER& props)
 
 		std::string _s = subtitles[props.subtitle];
 		size_t w = longest_line(s);
-		size_t _w = utf8len(_s);
+		size_t _w = utf8len(_s) - subtitle_offsets[props.logo];
 
 		if ( w > 0 && _w > 0 && _w < w && props.subtitle != SUBTITLE::LARGE ) {
 
