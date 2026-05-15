@@ -6,7 +6,7 @@ enum LOGO {
 };
 
 enum SUBTITLE {
-	NO_SUBTITLE, PLAIN, EXTENDED, THINTEXT, ITALY, BOLD, LARGE
+	NO_SUBTITLE, PLAIN, EXTENDED, THINTEXT, ITALY, ITALY_WIDE, BOLD, LARGE
 };
 
 static const LOGO classic_logo = LOGO::CLASSIC;
@@ -29,6 +29,7 @@ namespace banner {
 	extern bool logo_error;
 
 	const std::string logo(const std::string& filename = "", const BANNER& props = BANNER());
-	const int logo_width(const std::string& logo);
+	const int logo_size(const LOGO& logo);
+	const int subtitle_size(const SUBTITLE& subtitle);
 	const std::string separator(int width, const char& sep = '-');
 }

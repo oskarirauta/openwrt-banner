@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 		.args = { argc, argv },
 		.info = {
 			.name = "banner",
-			.version = "1.2.0",
+			.version = "1.3.0",
 			.author = "Oskari Rauta",
 			.copyright = "2026, Oskari Rauta",
 			.description = "\nbanner is program used to display a logo of Openwrt system after user logs in\n"
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "list of logos:\n"
 			<< "none, classic, classic2, modern, tiny, small, thin, simple, round, graffiti, sport, paint, blocky\n"
 			<< "\nlist of subtitles:\n"
-			<< "none, plain, extended, thintext, italy, bold, large\n"
+			<< "none, plain, extended, thintext, italy, italy_wide, bold, large\n"
 			<< "\ndefault logo: modern"
 			<< "\ndefault subtitle: none (unless no logo, subtitle or file defined, when default is extended)" << std::endl;
 
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 	if ( !usage["logo"] && !usage["subtitle"] && !usage["file"] ) {
 
 		props.logo = default_logo;
-		props.subtitle = SUBTITLE::EXTENDED;
+		props.subtitle = SUBTITLE::ITALY;
 	}
 
 	if ( usage["logo"] ) {
@@ -121,7 +121,8 @@ int main(int argc, char *argv[]) {
 		logo_file = usage["file"].value;
 
 	std::string logo(banner::logo(logo_file, props));
-	int logo_width = banner::logo_width(logo);
+	int logo_size = banner::logo_size(props.logo);
+	int subtitle_size = banner::subtitle_size(props.subtitle);
 	std::string os_release, os_commit;
 
 	banner::release_info(os_release, os_commit);
@@ -133,14 +134,16 @@ int main(int argc, char *argv[]) {
 	if ( !os_commit.empty())
 		release_text += ", git commit " + os_commit;
 
-	int release_width = release_text.size();
 	bool nopasswd = banner::root_password_is_empty();
-	int nopasswd_width = nopasswd ? root_pw_warning.size() : 0;
+	int nopasswd_size = nopasswd ? root_pw_warning.size() : 0;
 
 	std::string warning_msg(banner::logo_error ? ( banner_file_missing + logo_file ) : "");
-	int warning_width = warning_msg.size();
+	int warning_size = std::max(nopasswd_size, (int)warning_msg.size());
 
-	int line_width = std::max(logo_width, std::max(release_width, std::max(nopasswd_width, warning_width)));;
+	int line_width = std::max(
+				  std::max(logo_size, subtitle_size),
+				  std::max((int)release_text.size(), warning_size)
+			);
 
 	std::string separator(banner::separator(line_width > 0 ? line_width : 0));
 
@@ -152,7 +155,7 @@ int main(int argc, char *argv[]) {
 			separator << "\n" <<
 			release_text << "\n" <<
 			( nopasswd ? ( root_pw_warning + "\n" ) : "" ) <<
-			( warning_width == 0 ? "" : ( warning_msg + "\n" )) <<
+			( warning_size == 0 ? "" : ( warning_msg + "\n" )) <<
 			separator << std::endl;
 
 	return 0;

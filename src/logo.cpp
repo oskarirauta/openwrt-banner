@@ -37,6 +37,7 @@ static std::map<std::string, SUBTITLE> subtitle_names = {
 	{ "EXTENDED", SUBTITLE::EXTENDED },
 	{ "THINTEXT", SUBTITLE::THINTEXT },
 	{ "ITALY", SUBTITLE::ITALY },
+	{ "ITALY_WIDE", SUBTITLE::ITALY_WIDE },
 	{ "BOLD", SUBTITLE::BOLD },
 	{ "LARGE", SUBTITLE::LARGE }
 };
@@ -158,11 +159,12 @@ static std::map<LOGO, std::string> logos = {
 static std::map<SUBTITLE, std::string> subtitles = {
 
 	{ SUBTITLE::NO_SUBTITLE, "" },
-	{ SUBTITLE::PLAIN, "Wireless freedom" },
+	{ SUBTITLE::PLAIN, "Wireless freedom " },
 	{ SUBTITLE::EXTENDED, "W I R E L E S S   F R E E D O M " },
-	{ SUBTITLE::THINTEXT, "𝖶 𝗂𝗋𝖾𝗅𝖾𝗌𝗌 𝖿𝗋𝖾𝖾𝖽𝗈𝗆" },
-	{ SUBTITLE::ITALY, "𝙒 𝙞𝙧𝙚𝙡𝙚𝙨𝙨 𝙛𝙧𝙚𝙚𝙙𝙤𝙢" },
-	{ SUBTITLE::BOLD, "𝗪 𝗶𝗿𝗲𝗹𝗲𝘀𝘀 𝗳𝗿𝗲𝗲𝗱𝗼𝗺" },
+	{ SUBTITLE::THINTEXT, "𝖶 𝗂𝗋𝖾𝗅𝖾𝗌𝗌 𝖿𝗋𝖾𝖾𝖽𝗈𝗆 " },
+	{ SUBTITLE::ITALY, "𝙒 𝙞𝙧𝙚𝙡𝙚𝙨𝙨 𝙛𝙧𝙚𝙚𝙙𝙤𝙢 " },
+	{ SUBTITLE::ITALY_WIDE, "𝙒  𝙞 𝙧 𝙚 𝙡 𝙚 𝙨 𝙨   𝙛 𝙧 𝙚 𝙚 𝙙 𝙤 𝙢 "},
+	{ SUBTITLE::BOLD, "𝗪 𝗶𝗿𝗲𝗹𝗲𝘀𝘀 𝗳𝗿𝗲𝗲𝗱𝗼𝗺 " },
 	{ SUBTITLE::LARGE,
 		"▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄\n"
 		"██░███░██▄██░▄▄▀█░▄▄█░██░▄▄█░▄▄█░▄▄████░▄▄▄█░▄▄▀█░▄▄█░▄▄█░▄▀█▀▄▄▀█░▄▀▄░█\n"
@@ -186,6 +188,33 @@ static std::map<LOGO, size_t> subtitle_offsets = {
         { LOGO::SPORT, 0 },
         { LOGO::PAINT, 0 },
         { LOGO::BLOCKY, 0 }
+};
+
+static std::map<LOGO, size_t> logo_sizes = {
+	{ LOGO::NO_LOGO, 0 },
+	{ LOGO::CLASSIC, 48 },
+	{ LOGO::CLASSIC2, 59 },
+	{ LOGO::MODERN, 47 },
+	{ LOGO::TINY, 16 },
+	{ LOGO::SMALL, 36 },
+	{ LOGO::THIN, 35 },
+	{ LOGO::SIMPLE, 50 },
+	{ LOGO::ROUND, 41 },
+	{ LOGO::GRAFFITI, 37 },
+	{ LOGO::SPORT, 76 },
+	{ LOGO::PAINT, 58 },
+	{ LOGO::BLOCKY, 82 }
+};
+
+static std::map<SUBTITLE, size_t> subtitle_sizes = {
+	{ SUBTITLE::NO_SUBTITLE, 0 },
+	{ SUBTITLE::PLAIN, 15 },
+	{ SUBTITLE::EXTENDED, 30 },
+	{ SUBTITLE::THINTEXT, 15 },
+	{ SUBTITLE::ITALY, 15 },
+	{ SUBTITLE::ITALY_WIDE, 30 },
+	{ SUBTITLE::BOLD, 15 },
+	{ SUBTITLE::LARGE, 70 }
 };
 
 size_t utf8len(std::string s);
@@ -299,15 +328,14 @@ size_t utf8len(std::string s) {
 		[](char c) { return (static_cast<unsigned char>(c) & 0xC0) != 0x80; } );
 }
 
-const int banner::logo_width(const std::string& logo) {
+const int banner::logo_size(const LOGO& logo) {
 
-	size_t len = 0;
-	std::stringstream ss(logo);
+	return logo_sizes[logo];
+}
 
-	for ( std::string line; std::getline(ss, line, '\n');)
-		if ( size_t usize = utf8len(line); usize > len ) len = usize;
+const int banner::subtitle_size(const SUBTITLE& subtitle) {
 
-	return int(len);
+	return subtitle_sizes[subtitle];
 }
 
 const std::string banner::separator(int width, const char& sep) {
