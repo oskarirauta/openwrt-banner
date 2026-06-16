@@ -139,6 +139,7 @@ int main(int argc, char *argv[]) {
 
 	std::string warning_msg(banner::logo_error ? ( banner_file_missing + logo_file ) : "");
 	int warning_size = std::max(nopasswd_size, (int)warning_msg.size());
+	bool nowarning = warning_msg.empty();
 
 	int line_width = std::max(
 				  std::max(logo_size, subtitle_size),
@@ -155,7 +156,7 @@ int main(int argc, char *argv[]) {
 			separator << "\n" <<
 			release_text << "\n" <<
 			( nopasswd ? ( root_pw_warning + "\n" ) : "" ) <<
-			( warning_size == 0 ? "" : ( warning_msg + "\n" )) <<
+			( nowarning ? "" : ( warning_msg + "\n" )) <<
 			separator << std::endl;
 
 	return 0;
