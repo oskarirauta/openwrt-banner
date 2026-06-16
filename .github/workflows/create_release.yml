@@ -17,7 +17,7 @@ on:
       deep:
         description: 'create archive recursively on all levels'
         type: boolean
-        default: false
+        default: true
 
 jobs:
   build:
