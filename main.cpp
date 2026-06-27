@@ -12,6 +12,9 @@
 
 #include "usage.hpp"
 
+// the one place to bump on a release
+#define BANNER_VERSION "1.3.2"
+
 static const std::string root_pw_warning = " warning, root password is not set";
 static const std::string banner_file_missing = " access error, banner file: ";
 
@@ -23,7 +26,7 @@ int main(int argc, char *argv[]) {
 		.args = { argc, argv },
 		.info = {
 			.name = "banner",
-			.version = "1.3.0",
+			.version = BANNER_VERSION,
 			.author = "Oskari Rauta",
 			.copyright = "2026, Oskari Rauta",
 			.description = "\nbanner is program used to display a logo of Openwrt system after user logs in\n"
@@ -59,7 +62,7 @@ int main(int argc, char *argv[]) {
 			<< "\nlist of subtitles:\n"
 			<< "none, plain, extended, thintext, italy, italy_wide, bold, large\n"
 			<< "\ndefault logo: modern"
-			<< "\ndefault subtitle: none (unless no logo, subtitle or file defined, when default is extended)" << std::endl;
+			<< "\ndefault subtitle: none (unless no logo, subtitle or file defined, when default is italy)" << std::endl;
 
 		return 0;
 	}

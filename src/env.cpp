@@ -6,7 +6,8 @@
 #include "env.hpp"
 
 const std::string banner::username(void) {
-	return std::string(getlogin());
+	const char* login = ::getlogin();	// may be null without a controlling tty
+	return login ? std::string(login) : "";
 }
 
 const bool banner::root_password_is_empty(void) {
